@@ -31,13 +31,21 @@ jobs:
       - name: Build site
         run: npm run build
 
-      - name: Publish /out to pages branch
+      - name: Verify out directory
         run: |
-          if [ ! -d "out" ]; then
-            echo "ERROR: out/ directory not found"
+          if [ ! -f "out/index.html" ]; then
+            echo "ERROR: out/index.html not found"
             exit 1
           fi
 
+      - name: Save build output
+        run: |
+          rm -rf /tmp/site
+          mkdir -p /tmp/site
+          cp -r out/* /tmp/site/
+
+      - name: Publish to pages branch
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -45,7 +53,7 @@ jobs:
           git checkout pages || git checkout --orphan pages
 
           find . -mindepth 1 -maxdepth 1 ! -name ".git" -exec rm -rf {} +
-          cp -r out/* .
+          cp -r /tmp/site/* .
 
           git add -A
           git commit -m "Deploy static build from main" || exit 0
