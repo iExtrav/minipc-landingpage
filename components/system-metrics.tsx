@@ -248,6 +248,7 @@ export function SystemMetricsCard() {
         fetchMetrics("mem"),
         fetchMetrics("fs"),
         fetchMetrics("processlist"),
+        fetchMetrics("uptime"),
       ])
 
       if (!active) return
@@ -256,6 +257,7 @@ export function SystemMetricsCard() {
       const memData = results[1].status === "fulfilled" ? results[1].value : null
       const fsData = results[2].status === "fulfilled" ? results[2].value : null
       const processData = results[3].status === "fulfilled" ? results[3].value : null
+      const uptimeData = results[4].status === "fulfilled" ? results[4].value : null
 
       const cpuTotal = clampPercent(
         pickNumber(cpuData?.total, cpuData?.cpu_percent, cpuData?.total_percent),
@@ -311,22 +313,15 @@ export function SystemMetricsCard() {
       })
 
       const topProcesses = sortedProcesses.slice(0, 4)
-      const anySuccess = Boolean(cpuData || memData || fsData || processData)
+      const anySuccess = Boolean(cpuData || memData || fsData || processData || uptimeData)
 
       setStatus(anySuccess ? "online" : "offline")
       const uptimeSeconds = pickNumber(
-        cpuData?.uptime,
-        cpuData?.uptime_sec,
-        cpuData?.uptime_seconds,
-        memData?.uptime,
-        memData?.uptime_sec,
-        memData?.uptime_seconds,
-        fsData?.uptime,
-        fsData?.uptime_sec,
-        fsData?.uptime_seconds,
-        processData?.uptime,
-        processData?.uptime_sec,
-        processData?.uptime_seconds,
+        uptimeData?.uptime,
+        uptimeData?.uptime_sec,
+        uptimeData?.uptime_seconds,
+        uptimeData?.seconds,
+        uptimeData?.value,
       )
 
       setMetrics({
