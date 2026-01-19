@@ -1,12 +1,13 @@
 import { CopyButton } from "@/components/copy-button"
 import { ServiceStatus } from "@/components/service-status"
+import { SystemMetricsCard } from "@/components/system-metrics"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -67,22 +68,7 @@ export default function HomePage() {
 
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-12">
         <section className="grid gap-6 lg:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>System status</CardTitle>
-              <CardDescription>At-a-glance server metrics.</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-3 text-sm text-muted-foreground">
-              <div className="flex items-center justify-between">
-                <span>Services</span>
-                <span className="text-foreground">All online</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>Last update</span>
-                <span className="text-foreground">Today, 08:24 AM</span>
-              </div>
-            </CardContent>
-          </Card>
+          <SystemMetricsCard />
 
           <Card>
             <CardHeader>
