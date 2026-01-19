@@ -34,6 +34,13 @@ const services = [
     pingUrl: "http://192.168.4.142:8082/admin/favicon.ico",
     category: "Network",
   },
+  {
+    name: "code-server",
+    description: "Browser-based VS Code",
+    url: "http://192.168.4.142:8080/login",
+    pingUrl: "http://192.168.4.142:8080/favicon.ico",
+    category: "Development",
+  },
 ]
 
 const quickActions = [

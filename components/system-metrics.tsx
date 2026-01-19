@@ -58,6 +58,7 @@ type MetricsState = {
     mount: string | null
   }
   processes: ProcessEntry[]
+  uptimeSeconds: number | null
   updatedAt: Date | null
 }
 
@@ -66,6 +67,7 @@ const EMPTY_METRICS: MetricsState = {
   memory: { percent: null, used: null, total: null, available: null },
   disk: { percent: null, used: null, total: null, mount: null },
   processes: [],
+  uptimeSeconds: null,
   updatedAt: null,
 }
 
@@ -109,6 +111,16 @@ const formatTimestamp = (date: Date | null) => {
     minute: "2-digit",
     second: "2-digit",
   }).format(date)
+}
+
+const formatDuration = (seconds: number | null) => {
+  if (!seconds || seconds <= 0) return "--"
+  const days = Math.floor(seconds / 86400)
+  const hours = Math.floor((seconds % 86400) / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  if (days > 0) return `${days}d ${hours}h`
+  if (hours > 0) return `${hours}h ${minutes}m`
+  return `${minutes}m`
 }
 
 async function fetchMetrics(endpoint: string) {
@@ -302,6 +314,21 @@ export function SystemMetricsCard() {
       const anySuccess = Boolean(cpuData || memData || fsData || processData)
 
       setStatus(anySuccess ? "online" : "offline")
+      const uptimeSeconds = pickNumber(
+        cpuData?.uptime,
+        cpuData?.uptime_sec,
+        cpuData?.uptime_seconds,
+        memData?.uptime,
+        memData?.uptime_sec,
+        memData?.uptime_seconds,
+        fsData?.uptime,
+        fsData?.uptime_sec,
+        fsData?.uptime_seconds,
+        processData?.uptime,
+        processData?.uptime_sec,
+        processData?.uptime_seconds,
+      )
+
       setMetrics({
         cpu: { total: cpuTotal, user: cpuUser, system: cpuSystem, iowait: cpuIowait },
         memory: {
@@ -317,6 +344,7 @@ export function SystemMetricsCard() {
           mount: diskMount,
         },
         processes: topProcesses,
+        uptimeSeconds: uptimeSeconds ?? null,
         updatedAt: new Date(),
       })
 
@@ -460,6 +488,7 @@ export function SystemMetricsCard() {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span>Uptime: {formatDuration(metrics.uptimeSeconds)}</span>
           <span>Last sync: {formatTimestamp(metrics.updatedAt)}</span>
           <span>Refreshes every {REFRESH_INTERVAL_MS / 1000}s</span>
         </div>
