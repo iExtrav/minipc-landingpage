@@ -81,6 +81,38 @@ const pickNumber = (...values: Array<number | null | undefined>) => {
   return values.find((value) => typeof value === "number" && Number.isFinite(value)) ?? null
 }
 
+const parseUptimeString = (value: string) => {
+  const trimmed = value.trim()
+  if (!trimmed) return null
+
+  const numeric = Number(trimmed)
+  if (!Number.isNaN(numeric) && Number.isFinite(numeric)) return numeric
+
+  let days = 0
+  const dayMatch = trimmed.match(/(\d+)\s*day/)
+  if (dayMatch) days = Number(dayMatch[1])
+
+  const timeMatch = trimmed.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/)
+  if (!timeMatch) return days > 0 ? days * 86400 : null
+
+  const hours = Number(timeMatch[1] ?? 0)
+  const minutes = Number(timeMatch[2] ?? 0)
+  const seconds = Number(timeMatch[3] ?? 0)
+
+  return days * 86400 + hours * 3600 + minutes * 60 + seconds
+}
+
+const pickUptimeSeconds = (...values: Array<number | string | null | undefined>) => {
+  for (const value of values) {
+    if (typeof value === "number" && Number.isFinite(value)) return value
+    if (typeof value === "string") {
+      const parsed = parseUptimeString(value)
+      if (parsed !== null) return parsed
+    }
+  }
+  return null
+}
+
 const clampPercent = (value: number | null) => {
   if (value === null) return null
   return Math.min(100, Math.max(0, value))
@@ -113,14 +145,15 @@ const formatTimestamp = (date: Date | null) => {
   }).format(date)
 }
 
+const pad2 = (value: number) => String(value).padStart(2, "0")
+
 const formatDuration = (seconds: number | null) => {
-  if (!seconds || seconds <= 0) return "--"
-  const days = Math.floor(seconds / 86400)
-  const hours = Math.floor((seconds % 86400) / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  if (days > 0) return `${days}d ${hours}h`
-  if (hours > 0) return `${hours}h ${minutes}m`
-  return `${minutes}m`
+  if (seconds === null || !Number.isFinite(seconds) || seconds <= 0) return "--"
+  const totalSeconds = Math.floor(seconds)
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const remainingSeconds = totalSeconds % 60
+  return `${hours}:${pad2(minutes)}:${pad2(remainingSeconds)}`
 }
 
 async function fetchMetrics(endpoint: string) {
@@ -316,7 +349,7 @@ export function SystemMetricsCard() {
       const anySuccess = Boolean(cpuData || memData || fsData || processData || uptimeData)
 
       setStatus(anySuccess ? "online" : "offline")
-      const uptimeSeconds = pickNumber(
+      const uptimeSeconds = pickUptimeSeconds(
         uptimeData?.uptime,
         uptimeData?.uptime_sec,
         uptimeData?.uptime_seconds,
