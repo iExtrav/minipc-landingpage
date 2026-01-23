@@ -350,6 +350,7 @@ export function SystemMetricsCard() {
 
       setStatus(anySuccess ? "online" : "offline")
       const uptimeSeconds = pickUptimeSeconds(
+        uptimeData,
         uptimeData?.uptime,
         uptimeData?.uptime_sec,
         uptimeData?.uptime_seconds,
