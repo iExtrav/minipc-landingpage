@@ -150,10 +150,11 @@ const pad2 = (value: number) => String(value).padStart(2, "0")
 const formatDuration = (seconds: number | null) => {
   if (seconds === null || !Number.isFinite(seconds) || seconds <= 0) return "--"
   const totalSeconds = Math.floor(seconds)
-  const hours = Math.floor(totalSeconds / 3600)
+  const days = Math.floor(totalSeconds / 86400)
+  const hours = Math.floor((totalSeconds % 86400) / 3600)
   const minutes = Math.floor((totalSeconds % 3600) / 60)
   const remainingSeconds = totalSeconds % 60
-  return `${hours}:${pad2(minutes)}:${pad2(remainingSeconds)}`
+  return `${days}:${pad2(hours)}:${pad2(minutes)}:${pad2(remainingSeconds)}`
 }
 
 async function fetchMetrics(endpoint: string) {
